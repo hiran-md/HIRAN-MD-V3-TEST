@@ -9,7 +9,7 @@ const { state, saveCreds } = useMultiFileAuthState('./session'); // session will
 
 // Initialize the connection with WhatsApp
 const conn = makeWASocket({
-  auth: state,
+  auth: state, // Use the auth state from the session
   printQRInTerminal: true,  // This will print the QR code in the terminal
 });
 
