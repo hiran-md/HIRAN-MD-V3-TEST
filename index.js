@@ -1,44 +1,29 @@
-// index.js
-const { default: makeWASocket, useSingleFileAuthState, DisconnectReason } = require('@adiwajshing/baileys');
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@adiwajshing/baileys');
 const axios = require('axios');
 const fs = require('fs');
 const { sessionId, sessionFile, botName } = require('./config.js');
 const settings = require('./settings.js');
 
-// Load session state directly from the provided session ID
-const loadSession = () => {
-  if (fs.existsSync(sessionFile)) {
-    const sessionData = fs.readFileSync(sessionFile, 'utf-8');
-    return JSON.parse(sessionData);
-  } else {
-    return null;
-  }
-};
-
-// Using the session ID directly (load session file or use a new session if not available)
-const session = loadSession() || {
-  clientId: sessionId, 
-};
-
-const { state, saveState } = useSingleFileAuthState(session || sessionFile);
+// Use multi-file authentication state (recommended for newer versions)
+const { state, saveCreds } = useMultiFileAuthState('./session'); // session will be stored in the './session' directory
 
 // Initialize the connection with WhatsApp
 const conn = makeWASocket({
   auth: state,
-  printQRInTerminal: false,
+  printQRInTerminal: true,  // This will print the QR code in the terminal
 });
 
 conn.ev.on('connection.update', (update) => {
   const { connection, lastDisconnect } = update;
   if (connection === 'open') {
     console.log('Bot is connected to WhatsApp using the pre-generated session.');
-    saveState();
+    saveCreds();  // Save session credentials after connecting
   }
 
   if (connection === 'close') {
     const shouldReconnect = lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut;
     if (shouldReconnect) {
-      conn.connect();
+      conn.connect();  // Reconnect if not logged out
     }
   }
 });
@@ -133,5 +118,5 @@ async function searchAndDownloadYouTube(query, type = 'video') {
 
 // Connect the bot
 (async () => {
-  await conn.connect();  // Connect the bot using the session data from config.js
+  await conn.connect();  // Connect the bot using the session data
 })();
