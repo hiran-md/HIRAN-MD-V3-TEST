@@ -5,11 +5,11 @@ const { sessionId, sessionFile, botName } = require('./config.js');
 const settings = require('./settings.js');
 
 // Use multi-file authentication state (recommended for newer versions)
-const { state, saveCreds } = useMultiFileAuthState('./session'); // session will be stored in the './session' directory
+const { state, saveCreds } = useMultiFileAuthState('./session'); // This will store the session in the './session' folder
 
 // Initialize the connection with WhatsApp
 const conn = makeWASocket({
-  auth: state, // Pass the complete state to the socket
+  auth: state, // Pass the entire state which will include the credentials (creds)
   printQRInTerminal: true,  // This will print the QR code in the terminal
 });
 
